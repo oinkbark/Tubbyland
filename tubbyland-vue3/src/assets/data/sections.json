@@ -1,0 +1,36 @@
+{
+  "properties": {
+    "data": [
+      {
+        "title": "What is Tubbyland?",
+        "data": [
+          {
+            "icon": "handDrawnFace.svg",
+            "text": "It is fun. There are endless games, activites, and challenges to entertain the whole room"
+          },
+          { 
+            "icon": "handDrawnFish.svg",
+            "text": "It thrives off of creativity. No where else will you see a basketball fish or a finger light switch"
+          }
+        ]
+      },
+      {
+        "title": "Who is Mr. Tubb?",
+        "data": [
+          {
+            "icon": "handDrawnCap.svg",
+            "text": "He earned a Bachelors in Physical Education from ASU and has taught for too many years (33)"
+          },
+          { 
+            "icon": "handDrawnHeart.svg",
+            "text": "He takes care of his wife, daughter, two stepsons, two little dogs, and a Saint Bernard"
+          },
+          { 
+            "icon": "handDrawnMusicNote.svg",
+            "text": "He writes and performs songs with his guitar when he is not hiking or working on his cabin"
+          }
+        ]
+      }
+    ]
+  }
+}

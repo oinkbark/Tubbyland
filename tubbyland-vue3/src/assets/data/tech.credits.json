@@ -1,0 +1,29 @@
+{
+  "properties": {
+    "Developer Tools": [
+      { "name": "VS Code", "link": "https://code.visualstudio.com/", "purpose": "Remote editing; Intellisense" },
+      { "name": "Git", "link": "https://git-scm.com/", "purpose": "Version control system" },
+      { "name": "GitLab", "link": "https://gitlab.com/", "purpose": "Repo management" }
+    ],
+    "External Services": [
+      { "name": "Google Cloud", "link": "https://cloud.google.com/", "purpose": "Media hosting; Image building" },
+      { "name": "Cloudflare", "link": "https://www.cloudflare.com/", "purpose": "CDN; DNS; Security" },
+      { "name": "DigitalOcean", "link": "https://www.digitalocean.com/", "purpose": "Server hosting" }
+    ],
+    "Frontend Visuals": [
+      { "name": "Vue 3", "link": "https://vuejs.org/", "purpose": "Data first reactive components" },
+      { "name": "Inkscape", "link": "https://inkscape.org/", "purpose": "SVG icon editing" },
+      { "name": "MDN Docs", "link": "https://developer.mozilla.org/", "purpose": "Web API documentation" }
+    ],
+    "Backend Structure": [
+      { "name": "HashiCorp Stack", "link": "https://www.hashicorp.com/", "purpose": "Networking; Images; Secrets; IAC" },
+      { "name": "Docker", "link": "https://www.docker.com/", "purpose": "Consistent deployments" },
+      { "name": "Linux: Debian 10", "link": "https://www.debian.org/", "purpose": "Lightweight OS" }
+    ],
+    "Backend Containers": [
+      { "name": "Redis", "link": "https://www.nginx.com/", "purpose": "Sessions and response caching" },
+      { "name": "MongoDB", "link": "https://www.hashicorp.com/", "purpose": "Document storage" },
+      { "name": "NGINX", "link": "https://www.nginx.com/", "purpose": "SSL; Reverse proxy" }
+    ]
+  }
+}

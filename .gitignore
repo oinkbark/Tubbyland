@@ -1,0 +1,10 @@
+# NPM/Node JS
+**/node_modules
+**/package-lock.json
+
+sw.*
+**/dist
+
+# System (Linux/Mac hidden files)
+.nopanel
+.DS_Store

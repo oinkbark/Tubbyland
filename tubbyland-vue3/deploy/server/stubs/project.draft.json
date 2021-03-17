@@ -1,0 +1,35 @@
+{
+  "path": "art/setProject",
+  "data": {
+    "index": "draft",
+    "payload": {
+      "_id": "draft.stub",
+      "stateHash": "abc123",
+      "uri": "draft",
+      "title": "Draft",
+      "creationDate": "2021-02-23T04:04:54.250Z",
+      "isPublished": false,
+      "publishDate": null,
+      "revisionDate": null,
+      "sections": {
+        "images": null,
+        "materials": null,
+        "steps": {
+          "data": [
+            {
+              "text": "Example Step 1"
+            },
+            {
+              "text": "Example Step 2"
+            }
+          ]
+        }
+      },
+      "details": {
+        "duration": "Multiple days",
+        "difficulty": "Advanced",
+        "cost": 10
+      }
+    }
+  }
+}

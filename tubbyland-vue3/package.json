@@ -1,0 +1,49 @@
+{
+  "name": "oof",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "spa": "vite",
+    "spa-build": "vite build",
+    "spa-serve": "vite preview",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "vite build --ssrManifest --outDir deploy/dist/client",
+    "build:server": "vite build --ssr src/entry-server.js --outDir deploy/dist/server",
+    "deploy": "ts-node deploy/server/koa.ts"
+  },
+  "dependencies": {
+    "@koa/router": "^10.0.0",
+    "@popperjs/core": "^2.9.1",
+    "@vitejs/plugin-vue": "^1.1.4",
+    "@vue/server-renderer": "^3.0.5",
+    "address": "^1.1.2",
+    "default-gateway": "^6.0.3",
+    "focus-visible": "^5.2.0",
+    "koa": "latest",
+    "koa-connect": "^2.1.0",
+    "koa-static": "latest",
+    "less": "^4.1.1",
+    "node-fetch": "^2.6.1",
+    "pug": "latest",
+    "register-service-worker": "latest",
+    "tippy.js": "^6.3.1",
+    "ts-node": "^9.1.1",
+    "typescript": "latest",
+    "vite": "^2.0.3",
+    "vue": "^3.0.0",
+    "vue-router": "^4.0.0",
+    "vuedraggable": "^4.0.0",
+    "vuex": "^4.0.0",
+    "vuex-router-sync": "^6.0.0-rc.1"
+  },
+  "devDependencies": {
+    "@types/default-gateway": "^3.0.1",
+    "@types/koa": "latest",
+    "@types/koa__router": "^8.0.4",
+    "@types/koa-router": "latest",
+    "@types/koa-static": "latest",
+    "@types/node": "^14.14.35",
+    "@types/node-fetch": "^2.5.8",
+    "@vue/compiler-sfc": "^3.0.5"
+  }
+}

@@ -1,0 +1,82 @@
+// @import '@/assets/css/global/variables.less';
+
+.accept-button {
+  background-color: rgba(@var-lightGreen, 0.7);
+  &:hover {
+    background-color: rgba(@var-lightGreen, 0.9);
+  }
+}
+
+.neutral-button {
+  background-color: rgba(@var-lightBlue, 0.7);
+  &:hover {
+    background-color: rgba(@var-lightBlue, 0.9)
+  }
+}
+.decline-button {
+  background-color: rgba(@var-lightRed, 0.7);
+  &:hover {
+    background-color: rgba(@var-lightRed, 0.9);
+  }
+}
+.disabled-button {
+  opacity: 0.6;
+  cursor: not-allowed !important;
+}
+.hidden-button {
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+  z-index: -1;
+  width: 0.1px;
+  height: 0.1px;
+  overflow: hidden;
+}
+.leading-button {
+  margin-right: 5px;
+}
+
+.navigation-lines-container {
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.navigation-line-top,
+.navigation-line-bottom {
+  display: block;
+  clear: both;
+  width: 20px;
+  height: 1px;
+  background-color: white;
+  margin: 8px 0;
+  transition: 0.35s;
+}
+.navigation-x {
+  .navigation-line-top {
+      transform: rotate(45deg) translate(0, 6.5px);
+  }
+  .navigation-line-bottom {
+    transform: rotate(-45deg) translate(0, -6.5px);
+  }
+}
+
+.plus-icon {
+  //@extends .unselectable-image
+  display: flex;
+  border: 0;
+  box-sizing: border-box;
+  background-size: contain;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  &:hover {
+    cursor: pointer;
+  }
+}
+.button-reset {
+  display: flex;
+  border: 0;
+  background-color: transparent;
+  &:hover {
+    cursor: pointer;
+  }
+}

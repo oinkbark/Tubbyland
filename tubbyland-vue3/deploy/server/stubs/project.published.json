@@ -1,0 +1,59 @@
+{
+  "path": "art/setProject",
+  "data": {
+    "index": "published",
+    "payload": {
+      "_id": "published.stub",
+      "stateHash": "abc123",
+      "uri": "published",
+      "title": "Published",
+      "creationDate": "2021-02-23T04:04:54.250Z",
+      "isPublished": true,
+      "publishDate": "2021-02-23T04:04:54.250Z",
+      "revisionDate": null,
+      "sections": {
+        "images": {
+          "data": [
+            {
+              "name": "green.png",
+              "text": "Example Image 1"
+            },
+            {
+              "name": "blue.png",
+              "text": "Example Image 2"
+            },
+            {
+              "name": "red.png",
+              "text": "Example Image 3"
+            }
+          ]
+        },
+        "materials": {
+          "data": [
+            {
+              "text": "Example Material 1"
+            },
+            {
+              "text": "Example Material 2"
+            }
+          ]
+        },
+        "steps": {
+          "data": [
+            {
+              "text": "Example Step 1"
+            },
+            {
+              "text": "Example Step 2"
+            }
+          ]
+        }
+      },
+      "details": {
+        "duration": "All day",
+        "difficulty": "Easy",
+        "cost": 0
+      }
+    }
+  }
+}

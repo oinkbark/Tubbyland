@@ -1,0 +1,17 @@
+{
+  "properties": {
+    "Sole Creator": [
+      { "name": "OinkBark",
+        "avatar": "oinkbark.png",
+        "link": "https://oinkbark.com",
+        "bio": [
+          "Hello, I am OinkBark.",
+          "I personally handcrafted the entire frontend and backend for this website.",
+          "However, this journey was not travelled alone.",
+          "Real humans spent countless hours creating amazing software to grant this opportunity to me, and to others.",
+          "This page exists to help convey a piece of my heartfelt appreciation to all involved. Again: Thank You."
+        ]
+      }
+    ]
+  }
+}

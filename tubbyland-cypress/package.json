@@ -1,0 +1,17 @@
+{
+  "name": "tubbyland-cypress",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "open": "cypress open",
+    "test": "cypress run"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^12.12.50",
+    "cypress": "^6.6.0",
+    "typescript": "^4.2.2"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "query": "mutation { login { name, email, icon } }",
+  "variables": {
+  }
+}

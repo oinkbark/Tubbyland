@@ -1,0 +1,50 @@
+{
+  "name": "tubbyland-graphql",
+  "version": "1.0.0",
+  "description": "",
+  "author": "OinkBark",
+  "scripts": {
+    "deploy": "ts-node -r tsconfig-paths/register ./src/koa.ts"
+  },
+  "dependencies": {
+    "@google-cloud/iam-credentials": "latest",
+    "@google-cloud/storage": "latest",
+    "@koa/cors": "latest",
+    "@types/graphql": "latest",
+    "@types/koa": "latest",
+    "@types/koa-router": "latest",
+    "@types/koa-session": "latest",
+    "@types/mongodb": "latest",
+    "@types/node": "latest",
+    "@types/redis": "latest",
+    "@types/uuid": "latest",
+    "apollo-server-koa": "latest",
+    "class-transformer": "latest",
+    "class-validator": "latest",
+    "deepmerge": "latest",
+    "google-auth-library": "latest",
+    "graphql": "latest",
+    "graphql-query-complexity": "latest",
+    "handy-redis": "latest",
+    "koa": "latest",
+    "koa-bodyparser": "latest",
+    "koa-graphql": "latest",
+    "koa-router": "latest",
+    "koa-session": "latest",
+    "mongodb": "latest",
+    "redis": "latest",
+    "reflect-metadata": "latest",
+    "ts-node": "latest",
+    "tsconfig-paths": "latest",
+    "type-graphql": "latest",
+    "typeorm": "latest",
+    "typescript": "latest",
+    "uuid": "latest"
+  },
+  "devDependencies": {
+    "faker": "latest",
+    "jest": "latest"
+  },
+  "keywords": [],
+  "license": "MIT"
+}

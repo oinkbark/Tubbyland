@@ -1,0 +1,9 @@
+{
+  "query": "mutation ($_id: String!, $revisions: ArtProjectInput!) { updateProject(_id: $_id, revisions: $revisions) { title, _id, uri, details { cost } } }",
+  "variables": {
+    "_id": "ABC123",
+    "revisions": {
+      "isPublished": true
+    }
+  }
+}

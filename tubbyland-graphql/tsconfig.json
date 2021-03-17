@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "lib": [
+      "ESNext",
+      "ESNext.AsyncIterable",
+      "DOM"
+    ],
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "sourceMap": true,
+    "strict": true,
+    "noEmit": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "baseUrl": ".",
+    "paths": {
+      "secrets": [ "secrets/index.ts" ]
+    }
+  },
+  "types": [
+    "@types/node"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  "include": [
+    "./secrets/*", "./src/**/*.ts", "./src/services/**/*.ts", "src/providers/**/*.ts"
+  ]
+}

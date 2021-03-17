@@ -1,0 +1,6 @@
+{
+  "query": "mutation ($_id: String!) { deleteProject(_id: $_id) }",
+  "variables": {
+    "_id": "ABC123"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "query": "query ($index: String, $limits: ProjectReturnLimits) { getAllProjects(index: $index, limits: $limits) { _id, title, uri, creationDate, isPublished, sections { images { data { name, text } } }, details { cost, difficulty, duration } } }",
+  "variables": { 
+    "index": "published", 
+    "limits": { 
+      "images": 1 
+    } 
+  }
+}

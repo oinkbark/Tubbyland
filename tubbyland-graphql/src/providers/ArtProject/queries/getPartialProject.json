@@ -1,0 +1,8 @@
+{
+  "query": "query ($identifier: String!, $isURI: Boolean!, $index: String!) { getProject(identifier: $identifier, isURI: $isURI, index: $index) { stateHash, publishDate, revisionDate, sections { images { data { name, text } }, materials { data { text } }, steps { data { text } } } } }",
+  "variables": {
+    "identifier": "origin",
+    "isURI": true,
+    "index": "draft"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "query": "mutation ($title: String!) { spawnProject(title: $title) { title, uri, _id, creationDate } }",
+  "variables": {
+    "title": "OinkBark"
+  }
+}

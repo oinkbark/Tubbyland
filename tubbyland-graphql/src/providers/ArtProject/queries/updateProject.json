@@ -1,0 +1,24 @@
+{
+  "query": "mutation ($_id: String!, $revisions: ArtProjectInput!) { updateProject(_id: $_id, revisions: $revisions) { _id, uri, title, stateHash, creationDate, isPublished, publishDate, revisionDate, sections { images { data { name, text } }, materials { data { text } }, steps { data { text } } }, details { duration, difficulty, cost } } }",
+  "variables": {
+    "_id": "ABC123",
+    "revisions": {
+      "sections": {
+        "images": {
+          "data": [ { "text": "abc" }]
+        },
+        "materials": {
+          "data": [ { "text": "abc" }]
+        },
+        "steps": {
+          "data": [ { "text": "abc" }]
+        }
+      },
+      "details": {
+        "difficulty": "Normal",
+        "duration": "A few hours",
+        "cost": 20
+      }
+    }
+  }
+}

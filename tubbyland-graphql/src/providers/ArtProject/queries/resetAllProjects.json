@@ -1,0 +1,7 @@
+{
+  "query": "mutation ($index: String) { resetAllProjects(index: $index) }",
+  "x-query": "mutation { resetAllProjects }",
+  "args": {
+    "index": "draft"
+  }
+}

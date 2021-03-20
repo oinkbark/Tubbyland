@@ -1,6 +1,7 @@
 <script>
-import { computed, reactive, ref, inject, onMounted } from 'vue'
+import { computed, reactive, ref, inject, onMounted, onBeforeMount } from 'vue'
 import { useStore } from 'vuex'
+import InternalAPI from '@/components/InternalAPI.ts'
 import LoginFlow from '@/components/LoginFlow.ts'
 import Modal from '@/components/Modal.vue'
 
@@ -12,20 +13,20 @@ export default {
     Modal
   },
   setup() {
+    // Imports
     const store = useStore()
     const assetBucket = inject('assetBucket')
     const isHostname = inject('isHostname')
 
+    // Variables
     const account = new LoginFlow(store)
     const displayAccount = ref(false)
-
     const errorMessage = reactive({
       shouldDisplay: computed(() => store.state.auth.denied),
       close() { 
         store.commit('denyLogin', false) 
       }
     })
-
     const dropdown = reactive({
       "Account": {
         icon: "face",
@@ -55,15 +56,38 @@ export default {
       }
     })
 
+    // Functions
     async function logout() {
       displayAccount.value = false
       if (store.state.demoMode) store.dispatch('changeMode')
-      else {
-        store.commit('logout')
-        await account.logout()
+      else await account.logout()
+
+    }
+    async function verifyToken() {
+      const payload = window.localStorage.getItem('auth')
+      if (!payload) return
+      store.commit('setAuthPending', true)
+
+      const api = new InternalAPI()
+      const query = 'query { hasActiveSession }'
+      const apiRes = await api.query(query, {})
+      const validSession = apiRes?.hasActiveSession
+
+      if (validSession) {
+        store.commit('login', JSON.parse(payload))
+        store.dispatch('art/populatePreviews', { index: 'draft' })
+      } else {
+        window.localStorage.removeItem('auth')
       }
+      store.commit('setAuthPending', false)
     }
 
+    // Lifecycle Hooks
+    onBeforeMount(() => {
+      if (isHostname('root')) {
+        if (!store.state.auth.user) verifyToken()
+      }
+    })
     onMounted(() => {
       const trigger = document.querySelector('#nav-dropdown-trigger')
       const tooltip = document.querySelector('#nav-dropdown-plane')
@@ -81,12 +105,6 @@ export default {
         tippy(trigger, {
           content: tooltip,
         })
-      }
-      if (isHostname('root')) {
-        if (store.state.auth.user) return
-
-        const payload = window.localStorage.getItem('auth')
-        if (payload) store.commit('login', JSON.parse(payload))
       }
     })
 

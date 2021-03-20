@@ -1,7 +1,9 @@
 export interface IResult {
   pending: boolean
   error: boolean
-  message: string | null
+  message: string | null,
+  rawMessage: string | null,
+  reset: Function
 }
 export interface IMethods {
   [key:string]: Function
@@ -12,13 +14,21 @@ export default class InternalAPI {
   result:IResult = {
     pending: false,
     error: false,
-    message: null
+    rawMessage: null,
+    message: null,
+    reset: function () {
+      this.pending = false
+      this.error = false
+      this.rawMessage = null
+      this.message = null
+    }
   }
   methods!:IMethods
 
   async query(query:string, variables:Object = {}, auth?:string) {
     this.result.error = false
     this.result.pending = true
+    this.result.rawMessage = null
 
     try {
       const res = await fetch('https://api.tubbyland.com/graphql', {
@@ -44,9 +54,15 @@ export default class InternalAPI {
         const apiRes = await res.json()
         if (apiRes.errors) {
           console.error(apiRes.errors)
-
           this.result.error = true
-          this.result.message = 'Invalid request.'
+          this.result.rawMessage = apiRes.errors[0].message
+
+          if (apiRes.errors[0].message?.startsWith('invalid_token')) {
+            this.result.message = 'Invalid account session.'
+          } else {
+            this.result.message = 'Invalid request.'
+          }
+
           return null
         }
         else {

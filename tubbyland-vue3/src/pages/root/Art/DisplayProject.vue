@@ -1,5 +1,5 @@
 <script>
-import { defineComponent, ref, computed, inject, onBeforeMount, onMounted, reactive } from 'vue'
+import { defineComponent, ref, computed, watch, inject, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 
@@ -23,12 +23,11 @@ export default defineComponent({
     const modalOpen = ref(false)
 
     // Variables
-    const uri = route.params.uri
-    const project = computed(() => store.state.art.published.data[uri] || store.state.art.draft.data[uri] || null)
+    const uri = computed(() => route.params.uri)
+    const project = computed(() =>  store.state.art.published.data[uri.value] || store.state.art.draft.data[uri.value] || null)
+    const account = computed(() => store.state.auth.user)
     const selectedImageIndex = ref(0)
-    //const selectedImage = reactive(project.value?.sections?.images?.data?.[selectedImageIndex] || {})
 
-    // Functions
     function costify(cost) {
       if (!cost) return 'FREE'
       if (Number.isInteger(cost)) return `$${cost}.00`
@@ -40,9 +39,9 @@ export default defineComponent({
     }
 
     // Lifecycle Hooks
-    async function displayProject() {
+    function displayProject() {
       const visiting = {
-        again: Boolean(store.state.art.published.didFetch && project.value?.stateHash),
+        again: Boolean(project.value?.stateHash),
         fromPreview: Boolean((store.state.art.published.didFetch) && (!project.value?.stateHash) && (project.value?._id)),
         directlyWithSSR: Boolean((!store.state.art.published.didFetch) && (project.value?.stateHash)),
         directlyWithSPA: Boolean((!store.state.art.published.didFetch) && (!project.value?._id))
@@ -57,22 +56,37 @@ export default defineComponent({
       else if (visiting.directlyWithSPA) action = 'art/populateFullProject'
       else if (visiting.fromPreview) action = 'art/populatePartialProject'
 
-      if (!action) throw new Error('Stub is missing required properties.')
+      if (!action) throw new Error('Project is missing or stub does not include all required properties.')
       if (store.state.auth.user && !store.state.demoMode) {
-        if (project.value?.isPublished === false) index = 'draft'
+        // needs implementing on backend:
+        // Since we are authenticated we do not care what index it comes from
+        // index = '*'
+
+        // If SSR does not find a published project preview, it must be a draft
+        // If we are not using SSR this must be set to a wildcard
+        // since login check auto fetches draft index we will have the project ID
+        if (!project.value || project.value?.isPublished === false || visiting.directlyWithSPA) index = 'draft'
       }
       
       store.dispatch(action, {
-        uri,
+        uri: uri.value,
         index
       })
     }
     onMounted(() => {
-      displayProject()
+      if (!store.state.auth.pending) displayProject()
+      watch([account, project.value?.stateHash], (afterValues, beforeValues) => {
+        const loggedOut = Boolean(beforeValues[0] && !afterValues[0])
+        const projectDeleted = Boolean(beforeValues[1] && !afterValues[1])
+
+        if (loggedOut || projectDeleted) return
+        else displayProject()
+      })
     })
     // https://ssr.vuejs.org/guide/data.html#final-state-injection
 
     return {
+      route,
       store,
       project,
       assetBucket,
@@ -87,7 +101,7 @@ export default defineComponent({
 </script>
 
 <template lang="pug">
-div(class='page')
+div(class='page' :key='route.fullPath')
   div(v-if='project === null')
     h1 That project does not exist :(
   div(v-else-if='project?._id && !project?.stateHash')

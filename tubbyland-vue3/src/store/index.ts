@@ -8,8 +8,14 @@ export function createServerStore() {
       darkTheme: false,
       demoMode: false,
       auth: {
+        pending: false,
         denied: false,
         user: null
+      },
+      callback: {
+        method: () => null,
+        args: [],
+        thisContext: null
       }
     }),
     mutations: {
@@ -35,6 +41,15 @@ export function createServerStore() {
       },
       logout(state:any) {
         state.auth.user = null
+      },
+      setAuthPending(state:any, pending:boolean) {
+        state.auth.pending = pending
+      },
+      setCallback(state:any, payload:any) {
+        const { method, args, thisContext } = payload
+        state.callback.method = method
+        state.callback.args = args
+        state.callback.thisContext = thisContext
       }
     },
     actions: {

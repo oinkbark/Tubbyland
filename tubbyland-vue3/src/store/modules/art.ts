@@ -151,7 +151,7 @@ export default {
       return (uri:string) => {
         let project = null
         project = state.published.data[uri]
-        if (!project && state.auth.user && !state.demoMode ) {
+        if (!project && state.auth.user /* && !state.demoMode */ ) {
           project = state.draft.data[uri]
         }
         return project
@@ -195,6 +195,11 @@ export default {
     },
     deleteProject(state:any, { index, uri }:any) {
       return delete state[index].data[uri]
+    },
+    removeAuthorizedData(state:any) {
+      state.draft.data = {}
+      state.draft.didFetch = false
+      return
     }
   }
 }

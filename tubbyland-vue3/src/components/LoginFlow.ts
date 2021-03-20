@@ -27,7 +27,6 @@ export default class LoginFlow {
     return flowLink
   }
   async intakeOauthCode(event:any) {
-    if (location.hostname === 'demo.tubbyland.com') return
     if (!event.data || event.type !== 'message') return
     if (event.origin !== this.host) return console.error('bad host')
 
@@ -46,6 +45,7 @@ export default class LoginFlow {
 
     this.processedCodes.add(code)
     this.api.result.message = null
+    this.store.commit('setAuthPending', true)
 
     const query = "mutation { login { name, email, icon } }"
     const apiRes = await this.api.query(query, {}, `OAuth ${code} ${provider}`)
@@ -55,14 +55,21 @@ export default class LoginFlow {
       window.localStorage.setItem('auth', JSON.stringify(payload))
       this.store.commit('login', payload)
       this.store.dispatch('art/populatePreviews', { index: 'draft' })
+      
+      const callback = this.store.state.callback
+      await callback.method?.apply(callback.thisContext, callback.args)
     }
     else if (!payload && this.api.result.error) {
-      if (this.api.result.message!.startsWith('Invalid request'))
-      this.store.commit('denyLogin', true)
+      if (this.api.result.message!.startsWith('Invalid request')) {
+        this.store.commit('denyLogin', true)
+      }
     }
+    this.store.commit('setAuthPending', false)
   }
   async logout() {
     window.localStorage.removeItem('auth')
+    this.store.commit('logout')
+    this.store.commit('art/removeAuthorizedData')
 
     const query = "mutation { logout }"
     await this.api.query(query)

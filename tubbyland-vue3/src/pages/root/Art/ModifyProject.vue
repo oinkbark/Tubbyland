@@ -1,10 +1,13 @@
 <script>
 import { defineComponent, ref, reactive, computed, inject } from 'vue'
 import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
+
 import ProtoLayout from '@/components/PROTO.vue'
 import DragDrop from 'vuedraggable'
 import InternalAPI from '@/components/InternalAPI.ts'
 import GoogleAPI from '@/components/GoogleAPI.ts'
+import LoginFlow from '@/components/LoginFlow.ts'
 
 export default defineComponent({
   components: {
@@ -23,6 +26,7 @@ export default defineComponent({
     const uniqueKey = ref(10)
     const dragging = ref(false)
     const store = useStore()
+    const router = useRouter()
     const capitalize = inject('capitalize')
     const assetBucket = inject('assetBucket')
 
@@ -173,9 +177,11 @@ export default defineComponent({
       validate: function (willPublish) {
         this.data = []
 
+        //  Level 0: Pre Validation
+        if (store.state.demoMode) this.data.push({ section: 'none', message: 'Cannot access API in demo mode :(' })
+
         //  Level 1: Basic Validation
         if (!Form.title) this.data.push({ section: 'title', message: 'Title is always required.' })
-        if (store.state.demoMode) this.data.push({ section: 'none', message: 'Cannot access API in demo mode :(' })
         if (willPublish) {
           let publishErrors = []
           if (!Form.sections.images.data[0]?.src) publishErrors.push({ section: 'images', message: 'At least one image is required.' })
@@ -211,6 +217,10 @@ export default defineComponent({
             }
           }
         }
+      },
+      resetErrors: function() {
+        api.result.reset()
+        formErrors.data = []
       }
     })
     async function uploadImages(bucketName) {
@@ -246,10 +256,20 @@ export default defineComponent({
     }
 
     const api = new InternalAPI()
+    const account = new LoginFlow(store)
 
     api.result = reactive(api.result)
 
     api.methods = {
+      verifyRequestSession(method, args) {
+        if (api.result.error && api.result.message.startsWith('Invalid account')) {
+           api.result.message = 'Retrying Login...'
+           store.commit('setCallback', { method: method.bind(this), args, thisContext: this })
+           account.loginWithGoogle()
+           return false
+        }
+        return true
+      },
       async spawnProject(title = Form.title) {
         if (store.state.demoMode) return formErrors.data.push({ section: 'none', message: 'Cannot access API in demo mode :(' })
 
@@ -257,7 +277,12 @@ export default defineComponent({
         const query = 'mutation ($title: String!) { spawnProject(title: $title) { title, uri, _id, creationDate } }'
         const variables = { title }
         const apiRes = await api.query(query, variables)
-        if (!apiRes) return
+        if (!apiRes) {
+          if (api.result.error && api.result.rawMessage?.toLowerCase().includes('duplicate key')) {
+            formErrors.data.push({ section: 'title', message: 'Title must be unique.' })
+          }
+          return
+        }
 
         const projectInfo = apiRes.spawnProject
 
@@ -270,6 +295,7 @@ export default defineComponent({
 
         if (!Form.creationDate) {
           const initState = await this.spawnProject()
+          if (!api.methods.verifyRequestSession(api.methods.updateProject, [willPublish])) return
           if (api.result.error) return
 
           Form._id = initState._id
@@ -304,19 +330,25 @@ export default defineComponent({
 
         api.result.message = 'Uploading data...'
         const apiRes = await api.query(query, variables)
-        if (!apiRes) return
+        if (!api.methods.verifyRequestSession(api.methods.updateProject, [willPublish])) return
+        if (!apiRes) {
+          if (api.result.error && api.result.rawMessage?.toLowerCase().includes('duplicate key')) {
+            formErrors.data.push({ section: 'title', message: 'Title must be unique.' })
+          }
+          return
+        }
 
         api.result.message = 'Uploading images...'
         await uploadImages(Form._id)
 
         const payload = apiRes.updateProject
-        const oldIndex = Form.isPublished ? 'published' : 'draft'
+        const oldIndex = InitialState.isPublished ? 'published' : 'draft'
         const newIndex = payload.isPublished ? 'published' : 'draft'
 
         store.commit('art/setProject', {
-          ...(Form.uri) && {
+          ...(InitialState.uri) && {
               oldState: {
-              uri: Form.uri,
+              uri: InitialState.uri,
               index: oldIndex,
             } 
           },
@@ -326,6 +358,7 @@ export default defineComponent({
         await store.dispatch('art/populateMediaSrc', { uri: payload.uri, index: newIndex })
 
         emit("close")
+        router.push(`/art/${payload.uri}`)
       },
       async deleteProject(_id = Form._id) {
         if (!_id) return emit("close")
@@ -336,6 +369,7 @@ export default defineComponent({
         
         api.result.message = 'Deleting project...'
         const apiRes = await api.query(query, variables)
+        if (!api.methods.verifyRequestSession(api.methods.deleteProject, [_id])) return
         if (!apiRes) return
         
         store.commit('art/deleteProject', {
@@ -463,7 +497,7 @@ form(id='modify-project' @submit.prevent)
               img(:src='`${assetBucket}/svg/ModifyProject/error.svg`' alt='Error')
               h2 Error
             div(class='static-header-action')
-              button(class='neutral-button' @click.prevent='formErrors.data = []') Okay
+              button(class='neutral-button' @click.prevent='formErrors.resetErrors()') Okay
             
         template(v-slot:proto-content)
           div(id='project-error-messages' class='dashed-border')
@@ -472,13 +506,14 @@ form(id='modify-project' @submit.prevent)
         template(v-slot:proto-footer)
           hr
       div(id='modify-project-gateway' class='modify-project-section')
-        div(id='modify-project-confirmation' v-if='!api.result.message && !api.result.error && api.result.pending === false')
+        div(id='modify-project-confirmation' v-if='(!api.result.message && !api.result.error && api.result.pending === false) || formErrors.data.length')
           button(class='decline-button' @click.prevent='api.methods.deleteProject()') {{ projectActions.decline }}
           button(class='neutral-button' @click.prevent='api.methods.updateProject(projectActions.neutral.startsWith("Hide") ? false : undefined)') {{ projectActions.neutral }}
           button(class='accept-button' @click='api.methods.updateProject(true)') {{ projectActions.accept }}
         div(id='modify-project-status' v-else)
           div(class='project-status-state' v-if='api.result.error')
-            div There was an error processing your request.
+            div There was an error processing your request:
+            div {{ api.result.message || 'Unknown Error' }}
           div(class='project-status-state' v-else-if='api.result.pending')
             div Please Wait
             div(class='project-status-state' v-if='api.result.message') {{ api.result.message }}

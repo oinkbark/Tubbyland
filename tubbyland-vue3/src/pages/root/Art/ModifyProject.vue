@@ -30,6 +30,7 @@ export default defineComponent({
     const capitalize = inject('capitalize')
     const assetBucket = inject('assetBucket')
 
+    // Generic Media Functions
     function isImageFile (file) {
       if (file.type.split('/')[0] !== 'image') {
         formErrors.data.push({ section: 'images', message: `The uploaded file "${file.name}" is not an image.` })
@@ -59,7 +60,6 @@ export default defineComponent({
         }
       }
     }
-
     async function fileReaderAsync(imageFile) {
       return new Promise((resolve, reject) => {
         let reader = new window.FileReader()
@@ -73,6 +73,7 @@ export default defineComponent({
       })
     }
 
+    // Variables
     const renderGuide = {
       sections: {
         images: {
@@ -106,7 +107,6 @@ export default defineComponent({
         ]
       }
     }
-
     const emptySections = {
       images: {
         data: []
@@ -123,32 +123,14 @@ export default defineComponent({
       difficulty: 'Normal',
       duration: 'A few hours'
     }
-    // GraphQL fields are nullable; we need a common form data structure
-    function formify(project) {
-      if (project.sections === null) {
-        project.sections = emptySections
-      } else {
-        for (const SectionName in emptySections) {
-          if (!project.sections[SectionName]?.data) {
-            project.sections[SectionName] = emptySections[SectionName]
-          }
-        }
-      }
-      if (project.details === null) {
-        project.details = defaultDetails
-      }
-
-      return project
-    }
-
-    const DefaultState = {
+    const defaultState = {
       title: '',
       isPublished: false,
       sections: emptySections,
       details: defaultDetails
     }
-    const InitialState = props.project ? formify(JSON.parse(JSON.stringify(props.project))) : DefaultState
-    const Form = props.project ? reactive(formify(props.project)) : reactive(DefaultState)
+    const InitialState = props.project ? formify(JSON.parse(JSON.stringify(props.project))) : defaultState
+    const Form = props.project ? reactive(formify(props.project)) : reactive(defaultState)
 
     const projectActions = computed(() => {
       let exit = 'Cancel'
@@ -223,6 +205,40 @@ export default defineComponent({
         formErrors.data = []
       }
     })
+
+    // Functions
+    function appendInput (sectionName) {
+      formErrors.removeError(sectionName)
+      return Form.sections[sectionName].data.push({ text: '', id: ++this.uniqueKey })
+    }
+    // GraphQL fields are nullable; we need a common form data structure
+    function formify(project) {
+      if (project.sections === null) {
+        project.sections = emptySections
+      } else {
+        for (const SectionName in emptySections) {
+          if (!project.sections[SectionName]?.data) {
+            project.sections[SectionName] = emptySections[SectionName]
+          }
+        }
+      }
+      if (project.details === null) {
+        project.details = defaultDetails
+      }
+
+      return project
+    }
+    function requestClose(resetState) {
+      // With proxy values we are editing state directly
+      // Therefore we need to undo these changes
+      if (resetState || projectActions.value.exit === 'Discard Changes') {
+        store.commit('art/setProject', {
+          index: (InitialState.isPublished ? 'published' : 'draft'), 
+          payload: InitialState
+        })
+      }
+      emit("close")
+    }
     async function uploadImages(bucketName) {
       api.result.message = 'Uploading images...'
 
@@ -231,14 +247,17 @@ export default defineComponent({
   
       for (let i = 0; i < Form.sections?.images?.data?.length; i++) {
         const img = Form.sections.images.data[i]
+        const imgName = img.name || img.file?.name
+        const isPlaceholder = Boolean(!imgName || !img.src)
 
-        newImageNames.add(img.name || img.file?.name)
+        if (isPlaceholder) continue
+
+        newImageNames.add(imgName)
         // Do not reupload unchanged images when editing existing project
         // Existing images will start with 'https://storage.googleapis.com' or 'blob:'
         if (img.src.startsWith('data:')) {
           await google.uploadBucketObject(bucketName, img.file.name, img.file)
         }
-        else continue
       }
 
       const oldImages = InitialState.sections?.images?.data
@@ -255,14 +274,13 @@ export default defineComponent({
 
     }
 
+    // API
     const api = new InternalAPI()
     const account = new LoginFlow(store)
-
     api.result = reactive(api.result)
-
     api.methods = {
       verifyRequestSession(method, args) {
-        if (api.result.error && api.result.message.startsWith('Invalid account')) {
+        if (api.result.error && api.result.message?.startsWith('Invalid account')) {
            api.result.message = 'Retrying Login...'
            store.commit('setCallback', { method: method.bind(this), args, thisContext: this })
            account.loginWithGoogle()
@@ -378,23 +396,6 @@ export default defineComponent({
         })
         emit("close")
       }
-    }
-
-    function appendInput (sectionName) {
-      formErrors.removeError(sectionName)
-      return Form.sections[sectionName].data.push({ text: '', id: ++this.uniqueKey })
-    }
-
-    function requestClose(resetState) {
-      // With proxy values we are editing state directly
-      // Therefore we need to undo these changes
-      if (resetState || projectActions.value.exit === 'Discard Changes') {
-        store.commit('art/setProject', {
-          index: (InitialState.isPublished ? 'published' : 'draft'), 
-          payload: InitialState
-        })
-      }
-      emit("close")
     }
 
     return {

@@ -11,6 +11,8 @@ export interface IMethods {
 
 export default class InternalAPI {
 
+  host = process.env.NODE_ENV === 'production' ? 'https://api.tubbyland.com' : 'https://preview.tubbyland.com'
+
   result:IResult = {
     pending: false,
     error: false,
@@ -31,7 +33,7 @@ export default class InternalAPI {
     this.result.rawMessage = null
 
     try {
-      const res = await fetch('https://api.tubbyland.com/graphql', {
+      const res = await fetch(`${this.host}/graphql`, {
         method: 'POST',
         mode: 'cors',
         credentials: 'include',
@@ -52,7 +54,7 @@ export default class InternalAPI {
       }
       else {
         const apiRes = await res.json()
-        if (apiRes.errors) {
+        if (apiRes.errors?.length) {
           console.error(apiRes.errors)
           this.result.error = true
           this.result.rawMessage = apiRes.errors[0].message

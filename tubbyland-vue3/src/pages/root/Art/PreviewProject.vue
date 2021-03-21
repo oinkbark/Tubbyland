@@ -8,6 +8,7 @@ export default defineComponent({
     }
   },
   setup(props) {
+    // Imports
     const assetBucket = inject('assetBucket')
 
     return {

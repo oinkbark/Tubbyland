@@ -3,8 +3,10 @@ import { defineComponent, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 export default defineComponent({
   setup() {
+    // Imports
     const route = useRoute()
 
+    // Lifecycle Hooks
     onMounted(function () {
       if (window.opener) {
         if (window.name !== 'tubbyland') return

@@ -5,7 +5,9 @@ import { properties as TechCredits } from '@/assets/data/tech.credits.json'
 
 export default defineComponent({
   setup() {
+    // Imports
     const bucket = inject('assetBucket')
+
     return {
       bucket,
       Credits: {

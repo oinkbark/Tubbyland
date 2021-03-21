@@ -83,11 +83,6 @@ export default {
     }
 
     // Lifecycle Hooks
-    onBeforeMount(() => {
-      if (isHostname('root')) {
-        if (!store.state.auth.user) verifyToken()
-      }
-    })
     onMounted(() => {
       const trigger = document.querySelector('#nav-dropdown-trigger')
       const tooltip = document.querySelector('#nav-dropdown-plane')
@@ -105,6 +100,10 @@ export default {
         tippy(trigger, {
           content: tooltip,
         })
+      }
+
+      if (isHostname('root')) {
+        if (!store.state.auth.user) verifyToken()
       }
     })
 

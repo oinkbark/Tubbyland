@@ -4,7 +4,9 @@ import { properties as PageSections } from '@/assets/data/sections.json'
 
 export default defineComponent({
   setup() {
+    // Imports
     const assetBucket = inject('assetBucket')
+
     return {
       assetBucket,
       Sections: PageSections.data

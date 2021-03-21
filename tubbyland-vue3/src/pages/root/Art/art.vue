@@ -1,5 +1,5 @@
 <script>
-import { ref, reactive, computed, onBeforeMount, provide, inject } from 'vue'
+import { ref, reactive, computed, onBeforeMount, onMounted, provide } from 'vue'
 import { useStore } from 'vuex'
 
 import ProtoLayout from '@/components/PROTO.vue'
@@ -19,12 +19,11 @@ export default {
     const store = useStore()
     const modalOpen = ref(false)
     const demoMode = computed(() => store.state.demoMode)
-    const assetBucket = inject('assetBucket')
 
     // Variables
     const projects = reactive({ 
-      published: computed(() => store.state.art.published.data),
-      draft: computed(() => store.state.art.draft.data)
+      published: computed(() => store.state.art.published),
+      draft: computed(() => store.state.art.draft)
     })
 
     // Functions
@@ -33,22 +32,6 @@ export default {
       if (!projectID && !assetName) return base
       else return `${base}/${projectID}.tubbyland.com/${assetName}`
     }
-    // function returnMediaSrc(project, filename) {
-    //   if (!filename) {
-    //     if (project.sections?.images?.data?.length) {
-    //       filename = project.sections.images.data[0].name
-    //     }
-    //     else return `${assetBucket}/png/fallback.png`
-    //   }
-    //   const bucketLink = returnProjectBucket(project._id, filename)
-
-    //   if (project.isPublished) return bucketLink
-    //   else {
-    //     const google = new GoogleAPI()
-    //     google.fetchBucketObject(project._id, filename)
-    //     return 
-    //   }
-    // }
 
     // Lifecycle Hooks
     onBeforeMount(() => {
@@ -64,7 +47,6 @@ export default {
     })
 
     // Exports
-    // provide('returnMediaSrc', returnMediaSrc)
     provide('projectBucket', returnProjectBucket)
     
     return {
@@ -89,21 +71,23 @@ proto-layout(class='page')
       hr
   template(v-slot:proto-content)
     div(id='projects-content')
-      div(id='projects-published')
-        h1 Published ({{ Object.keys(projects.published).length }})
+      div(id='projects-published' :var='publishedLength=Object.keys(projects.published.data).length')
+        h1 Published ({{ publishedLength }})
         hr
-        div(v-if='!Object.keys(projects.published).length')  
+        div(v-if='projects.published.didFetch && !publishedLength') 
           h1 No projects have been published yet :(
         div(v-else class='project-previews-list')
-          router-link(v-for='(ProjectValue, ProjectKey, ArrayIndex) in projects.published' :to="`/art/${ProjectValue.uri}`" :key='ProjectKey')
+          h2(v-if='!publishedLength') Loading projects...
+          router-link(v-for='(ProjectValue, ProjectKey, ArrayIndex) in projects.published.data' :to="`/art/${ProjectValue.uri}`" :key='ProjectKey')
             preview-project(:preview='ProjectValue')
-      div(id='projects-draft' v-if='store.state.auth.user')
-        h1 Drafts ({{ Object.keys(projects.draft).length }})
+      div(id='projects-draft' v-if='store.state.auth.user' :var='draftLength=Object.keys(projects.draft.data).length')
+        h1 Drafts ({{ draftLength }})
         hr
-        div(v-if='!Object.keys(projects.draft).length')  
+        div(v-if='projects.draft.didFetch && !draftLength')  
           h2 Your project drafts will appear here.
         div(v-else class='project-previews-list')
-          router-link(v-for='(ProjectValue, ProjectKey, ArrayIndex) in projects.draft' :to="`/art/${ProjectValue.uri}`" :key='ProjectKey')
+          h2(v-if='!draftLength') Loading drafts...
+          router-link(v-else v-for='(ProjectValue, ProjectKey, ArrayIndex) in projects.draft.data' :to="`/art/${ProjectValue.uri}`" :key='ProjectKey')
             preview-project(:preview='ProjectValue')
 </template>
 

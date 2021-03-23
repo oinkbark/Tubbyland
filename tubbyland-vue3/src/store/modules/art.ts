@@ -5,7 +5,7 @@ const api = new InternalAPI()
 api.methods = {
   async fetchFullProject(uri:string, index:string = 'published') {
     console.debug(`Store.Art -> fetchFullProject: Fetching full project from index ${index}`)
-    const query = 'query ($identifier: String!, $isURI: Boolean!, $index: String!) { getProject(identifier: $identifier, isURI: $isURI, index: $index) { _id, uri, title, stateHash, creationDate, isPublished, publishDate, revisionDate, sections { images { data { name, text } }, materials { data { text } }, steps { data { text } } }, details { duration, difficulty, cost } } }'
+    const query = 'query ($identifier: String!, $isURI: Boolean!, $index: String!) { getProject(identifier: $identifier, isURI: $isURI, index: $index) { _id, uri, title, stateHash, creationDate, isPublished, publishDate, revisionDate, sections { images { data { name, text } }, materials { data { text } }, steps { data { text } }, files { data { name } }, links { data { text } } }, details { duration, difficulty, cost } } }'
     const variables = {
       identifier: uri,
       isURI: true,
@@ -18,7 +18,7 @@ api.methods = {
   },
   async fetchPartialProject(uri:string, index:string = 'published') {
     console.debug(`Store.Art -> fetchPartialProject: Fetching partial project from index: ${index}`)
-    const query = 'query ($identifier: String!, $isURI: Boolean!, $index: String!) { getProject(identifier: $identifier, isURI: $isURI, index: $index) { stateHash, publishDate, revisionDate, sections { images { data { name, text } }, materials { data { text } }, steps { data { text } } } } }'
+    const query = 'query ($identifier: String!, $isURI: Boolean!, $index: String!) { getProject(identifier: $identifier, isURI: $isURI, index: $index) { stateHash, publishDate, revisionDate, sections { images { data { name, text } }, materials { data { text } }, steps { data { text } }, files { data { name } }, links { data { text } } } } }'
     const variables = {
       identifier: uri,
       isURI: true,

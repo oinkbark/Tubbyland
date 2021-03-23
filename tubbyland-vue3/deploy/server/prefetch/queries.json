@@ -1,4 +1,4 @@
 {
-  "fetchFullProject": "query ($identifier: String!, $isURI: Boolean!, $index: String!) { getProject(identifier: $identifier, isURI: $isURI, index: $index) { _id, uri, title, stateHash, creationDate, isPublished, publishDate, revisionDate, sections { images { data { name, text } }, materials { data { text } }, steps { data { text } } }, details { duration, difficulty, cost } } }",
+  "fetchFullProject": "query ($identifier: String!, $isURI: Boolean!, $index: String!) { getProject(identifier: $identifier, isURI: $isURI, index: $index) { _id, uri, title, stateHash, creationDate, isPublished, publishDate, revisionDate, sections { images { data { name, text } }, materials { data { text } }, steps { data { text } }, files { data { name } }, links { data { text } } }, details { duration, difficulty, cost } } }",
   "fetchPaths": "query ($index: String) { getAllProjects(index: $index) { uri } }"
 }

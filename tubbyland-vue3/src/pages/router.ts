@@ -7,6 +7,7 @@ import {
 import IndexPage from '@/pages/root/index.vue'
 import ArtPage from '@/pages/root/Art/art.vue'
 import DisplayProject from './root/Art/DisplayProject.vue'
+
 import ApiIndexPage from '@/pages/api/index.vue'
 
 function returnRoutes(hostname?:string): Array<RouteRecordRaw> {
@@ -41,6 +42,11 @@ function returnRoutes(hostname?:string): Array<RouteRecordRaw> {
           path: '/credits',
           name: 'CreditsPage',
           component: () => import('./root/credits.vue')
+        },
+        {
+          path: '/build',
+          name: 'BuildPage',
+          component: () => import('./root/build.vue')
         },
         {
           path: '/login',

@@ -11,8 +11,6 @@ export interface IMethods {
 
 export default class InternalAPI {
 
-  host = process.env.NODE_ENV === 'production' ? 'https://api.tubbyland.com' : 'https://preview.tubbyland.com'
-
   result:IResult = {
     pending: false,
     error: false,
@@ -26,6 +24,21 @@ export default class InternalAPI {
     }
   }
   methods!:IMethods
+
+  get host() {
+    let value = ''
+    let previewMode = false
+
+    try {
+      if (location) previewMode = Boolean(location.hostname === 'preview.tubbyland.com')
+    } catch { }
+    try {
+      if (process) previewMode = Boolean(process.env.PREVIEW)
+    } catch { }
+
+    value = previewMode ? 'https://preview.tubbyland.com' : 'https://api.tubbyland.com'
+    return value
+  }
 
   async query(query:string, variables:Object = {}, auth?:string) {
     this.result.error = false

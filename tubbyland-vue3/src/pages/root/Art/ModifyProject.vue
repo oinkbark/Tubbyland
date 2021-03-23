@@ -42,30 +42,29 @@ export default defineComponent({
       }
       return true
     }
-    async function processUploadedImages (event) {
+    async function processUploadedFiles (event, section) {
       const fileInput = event.target
       const uploadedFiles = fileInput.files
       const dataIndex = fileInput.attributes.dataIndex.value
 
       // Remove real file input
-      Form.sections.images.data.splice(dataIndex, 1)
+      Form.sections[section].data.splice(dataIndex, 1)
 
       for (let i = 0; i < uploadedFiles.length; i++) {
-        const imageFile = uploadedFiles[i]
+        const rawFile = uploadedFiles[i]
 
-        if (isImageFile(imageFile)) {
-          let imageSrc = await fileReaderAsync(imageFile)
+        if (section === 'images' && !isImageFile(rawFile)) continue
 
-          Form.sections.images.data.splice(dataIndex, 0, { file: imageFile, name: imageFile.name, src: imageSrc, text: '' })
-        }
+        const fileSrc = await fileReaderAsync(rawFile)
+        Form.sections[section].data.splice(dataIndex, 0, { file: rawFile, name: rawFile.name, src: fileSrc, text: '' })
       }
     }
-    async function fileReaderAsync(imageFile) {
+    async function fileReaderAsync(rawFile) {
       return new Promise((resolve, reject) => {
         let reader = new window.FileReader()
 
         reader.onerror = reject
-        reader.readAsDataURL(imageFile)
+        reader.readAsDataURL(rawFile)
 
         reader.onload = () => {
           resolve(reader.result)
@@ -87,6 +86,14 @@ export default defineComponent({
         },
         steps: {
           listType: 'ol',
+          inputType: 'text'
+        },
+        files: {
+          listType: 'ul',
+          inputType: 'file',
+        },
+        links: {
+          listType: 'ul',
           inputType: 'text'
         }
       },
@@ -115,6 +122,12 @@ export default defineComponent({
         data: []
       },
       steps: {
+        data: []
+      },
+      files: {
+        data: []
+      },
+      links: {
         data: []
       }
     }
@@ -176,12 +189,17 @@ export default defineComponent({
 
         // Level 2: Iterative Validation
         if (!this.data.length) {
-          const imageData = Form.sections.images.data
-          let rawImageNames = new Set()
-          for (const img of imageData) {
-            rawImageNames.add(img.name || img.file?.name)
+          const fileSections = ['images', 'files']
+
+          for (const section of fileSections) {
+            const elementData = Form.sections[section].data
+            const rawFileNames = new Set()
+
+            for (const element of elementData) {
+              rawFileNames.add(element.name || element.file?.name)
+            }
+            if (elementData.length !== rawFileNames.size) this.data.push({ section, message: `Duplicate names for ${section} are not permitted.` })
           }
-          if (imageData.length !== rawImageNames.size) this.data.push({ section: 'images', message: 'Duplicate image names are not permitted.' })
         }
 
         return Boolean(this.data.length)
@@ -239,37 +257,42 @@ export default defineComponent({
       }
       emit("close")
     }
-    async function uploadImages(bucketName) {
-      api.result.message = 'Uploading images...'
+    // ToDo: add progess meter that shows index out of total
+    async function uploadMedia(bucketName) {
+      api.result.pending = true
+      api.result.message = 'Uploading media...'
 
-      const newImageNames = new Set()
       const google = new GoogleAPI()
+      const mediaSections = ['images', 'files']
+
+      for (const section of mediaSections) {
+        const newMediaNames = new Set()
   
-      for (let i = 0; i < Form.sections?.images?.data?.length; i++) {
-        const img = Form.sections.images.data[i]
-        const imgName = img.name || img.file?.name
-        const isPlaceholder = Boolean(!imgName || !img.src)
+        for (let i = 0; i < Form.sections?.[section]?.data?.length; i++) {
+          const media = Form.sections[section].data[i]
+          const mediaName = media.name || media.file?.name
+          const isPlaceholder = Boolean(!mediaName || !media.src)
 
-        if (isPlaceholder) continue
+          if (isPlaceholder) continue
 
-        newImageNames.add(imgName)
-        // Do not reupload unchanged images when editing existing project
-        // Existing images will start with 'https://storage.googleapis.com' or 'blob:'
-        if (img.src.startsWith('data:')) {
-          await google.uploadBucketObject(bucketName, img.file.name, img.file)
-        }
-      }
-
-      const oldImages = InitialState.sections?.images?.data
-
-      if (oldImages.length) {
-        for (const oldImg of oldImages) {
-
-          if (!newImageNames.has(oldImg.name)) {
-            await google.deleteBucketObject(bucketName, oldImg.name)
+          newMediaNames.add(mediaName)
+          // Do not reupload unchanged images when editing existing project
+          // Existing images will start with 'https://storage.googleapis.com' or 'blob:'
+          if (media.src.startsWith('data:')) {
+            await google.uploadBucketObject(bucketName, media.file.name, media.file)
           }
-
         }
+
+        const oldMediaSection = InitialState.sections?.[section].data
+
+        if (oldMediaSection.length) {
+          for (const oldMedia of oldMediaSection) {
+            if (!newMediaNames.has(oldMedia.name)) {
+              await google.deleteBucketObject(bucketName, oldMedia.name)
+            }
+          }
+        }
+
       }
 
     }
@@ -304,8 +327,8 @@ export default defineComponent({
 
         const projectInfo = apiRes.spawnProject
 
-        api.result.message = 'Uploading images...'
-        await uploadImages(projectInfo._id)
+        // api.result.message = 'Uploading images...'
+        // await uploadMedia(projectInfo._id)
         return projectInfo
       },
       async updateProject(willPublish) {
@@ -321,7 +344,7 @@ export default defineComponent({
 
         if (!Form._id) return console.error('Cannot update project without ID')
 
-        const query = 'mutation ($_id: String!, $revisions: ArtProjectInput!) { updateProject(_id: $_id, revisions: $revisions) { _id, uri, title, stateHash, creationDate, isPublished, publishDate, revisionDate, sections { images { data { name, text } }, materials { data { text } }, steps { data { text } } }, details { duration, difficulty, cost } } }'
+        const query = 'mutation ($_id: String!, $revisions: ArtProjectInput!) { updateProject(_id: $_id, revisions: $revisions) { _id, uri, title, stateHash, creationDate, isPublished, publishDate, revisionDate, sections { images { data { name, text } }, materials { data { text } }, steps { data { text } }, files { data { name } }, links { data { text } } } }, details { duration, difficulty, cost } } }'
         let variables = { 
           _id: Form._id, 
           revisions: JSON.parse(JSON.stringify(Form))
@@ -357,7 +380,7 @@ export default defineComponent({
         }
 
         api.result.message = 'Uploading images...'
-        await uploadImages(Form._id)
+        await uploadMedia(Form._id)
 
         const payload = apiRes.updateProject
         const oldIndex = InitialState.isPublished ? 'published' : 'draft'
@@ -406,7 +429,7 @@ export default defineComponent({
       dragging,
       renderGuide,
       appendInput,
-      processUploadedImages,
+      processUploadedFiles,
       projectActions,
       api,
       formErrors,
@@ -465,13 +488,17 @@ form(id='modify-project' @submit.prevent)
                         img(v-if='element.src' :src='element.src')
                         img(v-else src='/LoadingImage.svg')
                         input(v-model='element.text' type='text' placeholder='Image Description')
-                      input(v-else='!element.src' type='file' multiple accept='.jpg, .jpeg, .png' @change='processUploadedImages' :dataIndex='index')
+                      input(v-else='!element.src' type='file' multiple accept='.jpg, .jpeg, .png' @change='processUploadedFiles($event, "images")' :dataIndex='index')
                   li(class='section-input' v-else-if='inputType==="text"')
                     input(type='text' v-model='element.text' :placeholder='"New " + SectionName.slice(0, -1)')
+                  li(class='section-input' v-else-if='inputType==="file"')
+                    div(class='static-file-preview' v-if='element.name') {{ element.name }}
+                    input(v-else-if='!element.src' type='file' multiple @change.prevent='processUploadedFiles($event, "files")' :dataIndex='index')
                   button(class='decline-button' @click='SectionValue.data.splice(index, 1)')
                     i(class='material-icons') remove
         template(v-slot:proto-footer)
           hr
+
       proto-layout(id='modify-project-details' class='modify-project-section' :class='{ "section-error": formErrors.data.find(el => el.section === "details") }')
         template(v-slot:proto-header)
           div(class='section-header')

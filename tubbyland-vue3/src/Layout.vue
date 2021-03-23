@@ -17,6 +17,7 @@ export default defineComponent({
     const hostnames = {
       root: 'tubbyland.com',
       api: 'api.tubbyland.com',
+      preview: 'preview.tubbyland.com',
       dev: 'localhost'
     }
 
@@ -27,6 +28,10 @@ export default defineComponent({
     })
 
     provide('assetBucket', 'https://assets.tubbyland.com')
+    provide('returnAssetLink', function(bucketName, fileName) {
+      const base = 'https://storage.googleapis.com'
+      return `${base}/${bucketName}.tubbyland.com/${fileName}`
+    })
 
     provide('isHostname', function(key) {
       return Boolean(store.state.hostname === hostnames[key])

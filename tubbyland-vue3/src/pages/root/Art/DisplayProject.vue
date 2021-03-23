@@ -20,6 +20,7 @@ export default defineComponent({
     const store = useStore()
     const capitalize = inject('capitalize')
     const assetBucket = inject('assetBucket')
+    const returnAssetLink = inject('returnAssetLink')
     const modalOpen = ref(false)
 
     // Variables
@@ -73,7 +74,7 @@ export default defineComponent({
         index
       })
     }
-    
+
     // Lifecycle Hooks
     onMounted(() => {
       if (!store.state.auth.pending) displayProject()
@@ -91,6 +92,7 @@ export default defineComponent({
       store,
       project,
       assetBucket,
+      returnAssetLink,
       capitalize,
       modalOpen,
       selectedImageIndex,
@@ -129,7 +131,6 @@ div(class='page' :key='route.fullPath')
           div(id='media-live' v-if='project.sections?.images?.data?.length && project.sections.images.data[0].name')
             div(id='project-media-selected' :var='displayedImage = project.sections.images.data[selectedImageIndex]')
               img(:src='displayedImage?.src || "/LoadingImage.svg"' class='hand-drawn-border')
-              // img(v-else src='/LoadingImage.svg' class='hand-drawn-border')
               figcaption(v-if='displayedImage?.text') {{ displayedImage.text }}
             div(id='project-media-thumbnails' v-if='project.sections?.images?.data?.length > 1')
               i(class='material-icons-two-tone media-thumbnail-navigate' @click='selectedImageIndex !== 0 ? --selectedImageIndex : null') navigate_before
@@ -167,6 +168,20 @@ div(class='page' :key='route.fullPath')
                 ol(v-if='SectionName === "steps"')
                   li(v-for='element in project.sections[SectionName].data') {{ element.text }}
               div(class='empty-section'  v-else)
+                h3 There are no {{ SectionName }} for this project yet.
+            template(v-slot:proto-footer)
+              hr
+        div(id='project-external')
+          proto-layout(class='project-text-section' v-for='(SectionName) in ["files", "links"]')
+            template(v-slot:proto-header)
+              h2 {{ capitalize(SectionName) }}
+            template(v-slot:proto-content)
+              div(v-if='project.sections?.[SectionName]?.data?.length')
+                ul
+                  li(v-for='element in project.sections[SectionName].data')
+                    a(v-if='SectionName === "files"' :href='returnAssetLink(project._id, element.name)') {{ element.name }}
+                    a(v-else-if='SectionName === "links"' :href='element.text') {{ element.text }}
+              div(v-else class='empty-section')
                 h3 There are no {{ SectionName }} for this project yet.
             template(v-slot:proto-footer)
               hr

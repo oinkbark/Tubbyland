@@ -2,6 +2,7 @@ import { AuthenticationError } from 'apollo-server-koa'
 import { v4 as generateApiToken } from 'uuid'
 //import { Context } from 'koa'
 import GoogleFlow from './GoogleFlow'
+import InternalFlow from './InternalFlow'
 import { EmailWhitelist } from 'secrets'
 
 // https://tools.ietf.org/html/rfc6750
@@ -36,17 +37,24 @@ export default async ({ context }:any, _roles?:any) => {
     if (!oauthProvider) throw new AuthenticationError('invalid_request: Missing OAuth provider')
 
     let oauthFlow = null
+    let oauthTokens = null
+    let oauthUser = null
+
+
     if (oauthProvider === 'google') oauthFlow = new GoogleFlow()
+    else if (oauthProvider === 'internal') oauthFlow = new InternalFlow()
     if (!oauthFlow) throw new AuthenticationError('invalid_request: OAuth provider is not supported')
 
-    const oauthTokens = await oauthFlow.getTokens(authKey)
+    oauthTokens = await oauthFlow.getTokens(authKey)
     if (!oauthTokens) throw new AuthenticationError('invalid_code: OAuth code is not valid')
 
-    const oauthUser = await oauthFlow.getUserInfo(oauthTokens)
+    oauthUser = await oauthFlow.getUserInfo(oauthTokens)
     if (!oauthUser) throw new AuthenticationError('Internal Server Error: Cannot fetch user info')
-
-    if(!EmailWhitelist.emails.includes(oauthUser!.email)) {
-      throw new AuthenticationError('insufficient_scope: Email is not whitelisted')
+    
+    if (oauthProvider !== 'internal') {
+      if(!EmailWhitelist.emails.includes(oauthUser!.email)) {
+        throw new AuthenticationError('insufficient_scope: Email is not whitelisted')
+      }
     }
 
     const resToken = generateApiToken()

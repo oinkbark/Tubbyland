@@ -67,8 +67,8 @@ export class PublishedDetailsType implements ProjectDetailsType {
 
 @ObjectType()
 export class SectionDataType {
-  @Field()
-  text!: string
+  @Field({ nullable: true })
+  text?: string
 
   @Field({ nullable: true })
   name?: string
@@ -99,6 +99,12 @@ export class ProjectSectionsType {
 
   @Field(() => ProjectSectionType, { nullable: true })
   steps?: ProjectSectionType
+
+  @Field(() => ProjectSectionType, { nullable: true })
+  files?: ProjectSectionType
+
+  @Field(() => ProjectSectionType, { nullable: true })
+  links?: ProjectSectionType
 }
 
 @ObjectType()
@@ -117,6 +123,14 @@ export class PublishedSectionsType {
   @IsNotEmpty()
   @ValidateNested()
   steps!: PublishedSectionType
+
+  @Field(() => ProjectSectionType, { nullable: true })
+  @ValidateNested()
+  files?: ProjectSectionType
+
+  @Field(() => ProjectSectionType, { nullable: true })
+  @ValidateNested()
+  links?: ProjectSectionType
 }
 
 @ObjectType()

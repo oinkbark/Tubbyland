@@ -19,8 +19,8 @@ export class ProjectReturnLimits {
 
 @InputType()
 export class SectionDataInput implements Types.SectionDataType {
-  @Field()
-  text!: string
+  @Field({ nullable: true })
+  text?: string
 
   @Field({ nullable: true })
   name?: string
@@ -42,6 +42,12 @@ export class ProjectSectionsInput implements Types.ProjectSectionsType {
 
   @Field(() => ProjectSectionInput, { nullable: true })
   steps?: ProjectSectionInput
+
+  @Field(() => ProjectSectionInput, { nullable: true })
+  files?: ProjectSectionInput
+
+  @Field(() => ProjectSectionInput, { nullable: true })
+  links?: ProjectSectionInput
 }
 
 @InputType()
@@ -54,6 +60,12 @@ export class PublishedSectionsInput implements Types.PublishedSectionsType {
 
   @Field(() => ProjectSectionInput)
   steps!: ProjectSectionInput
+
+  @Field(() => ProjectSectionInput, { nullable: true })
+  files?: ProjectSectionInput
+
+  @Field(() => ProjectSectionInput, { nullable: true })
+  links?: ProjectSectionInput
 }
 
 @InputType()

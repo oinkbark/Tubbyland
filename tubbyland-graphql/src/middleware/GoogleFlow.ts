@@ -10,8 +10,6 @@ export default class GoogleFlow {
   apiClient = new GoogleOAuth2Client(this.apiOptions)
 
   async getTokens(oauthCode:string) {
-    console.log(this.apiOptions)
-    console.log(oauthCode)
     try { 
       const r = await this.apiClient.getToken(oauthCode)
       return r.tokens

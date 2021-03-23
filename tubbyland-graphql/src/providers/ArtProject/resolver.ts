@@ -28,14 +28,14 @@ export interface ICache {
 
 @Resolver()
 export default class ArtProjectResolver {
-  private readonly databaseName:string = 'OinkServer'
+  private readonly databaseName:string = process.env.PREVIEW ? 'Preview' : 'OinkServer'
   private readonly collectionName:string = 'Projects'
 
   private RedisClient:any = null
   private MongoService:any = null
 
   private cache:ICache = {
-    enabled: Boolean(this.RedisClient),
+    enabled: Boolean(!process.env.PREVIEW && this.RedisClient),
     size: {
       published: 0,
       draft: 0

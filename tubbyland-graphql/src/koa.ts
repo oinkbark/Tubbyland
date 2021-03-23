@@ -24,10 +24,6 @@ export async function main () {
 
   // const cookieStore = new SessionStore()
   // await cookieStore.verifyRedisConnection()
-  // await cookieStore.set('OinkServer', 'test')
-  // await cookieStore.get('OinkServer')
-  // .redis.connected: false,
-  // .redis.ready: false
 
   // const sessionConfig = {
   //   key: 'oinkserver.session',
@@ -46,10 +42,6 @@ export async function main () {
   //     destroy: cookieStore.destroy.bind(cookieStore)
   //   }
   // }
-  // console.log(await sessionConfig.store.get('OinkServer'))
-  // console.log(await sessionConfig.store.set('OinkServer', 'test2'))
-  // console.log(await sessionConfig.store.get('OinkServer'))
-
 
   let app = new Koa()
   app.proxy = Boolean(process.env.NODE_ENV === 'production')

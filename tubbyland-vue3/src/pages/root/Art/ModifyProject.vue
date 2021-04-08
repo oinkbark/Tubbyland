@@ -257,21 +257,23 @@ export default defineComponent({
       }
       emit("close")
     }
-    // ToDo: add progess meter that shows index out of total
     async function uploadMedia(bucketName) {
       api.result.pending = true
-      api.result.message = 'Uploading media...'
+      api.result.message = 'Preparing media...'
 
       const google = new GoogleAPI()
       const mediaSections = ['images', 'files']
 
       for (const section of mediaSections) {
         const newMediaNames = new Set()
+        const sectionDataLength = Form.sections?.[section]?.data?.length
   
-        for (let i = 0; i < Form.sections?.[section]?.data?.length; i++) {
+        for (let i = 0; i < sectionDataLength; i++) {
+          api.result.message = `Uploading ${section}... (${i + 1}/${sectionDataLength})`
+
           const media = Form.sections[section].data[i]
           const mediaName = media.name || media.file?.name
-          const isPlaceholder = Boolean(!mediaName || !media.src)
+          const isPlaceholder = Boolean((!mediaName) || (section === 'images' && !media.src))
 
           if (isPlaceholder) continue
 
@@ -344,7 +346,7 @@ export default defineComponent({
 
         if (!Form._id) return console.error('Cannot update project without ID')
 
-        const query = 'mutation ($_id: String!, $revisions: ArtProjectInput!) { updateProject(_id: $_id, revisions: $revisions) { _id, uri, title, stateHash, creationDate, isPublished, publishDate, revisionDate, sections { images { data { name, text } }, materials { data { text } }, steps { data { text } }, files { data { name } }, links { data { text } } } }, details { duration, difficulty, cost } } }'
+        const query = 'mutation ($_id: String!, $revisions: ArtProjectInput!) { updateProject(_id: $_id, revisions: $revisions) { _id, uri, title, stateHash, creationDate, isPublished, publishDate, revisionDate, sections { images { data { name, text } }, materials { data { text } }, steps { data { text } }, files { data { name } }, links { data { text } } }, details { duration, difficulty, cost } } }'
         let variables = { 
           _id: Form._id, 
           revisions: JSON.parse(JSON.stringify(Form))
